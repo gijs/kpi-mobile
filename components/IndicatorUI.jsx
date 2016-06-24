@@ -88,75 +88,47 @@ class IndicatorUI extends Component {
       ;
 
     return (
-      <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-        <div style={{
-            backgroundColor: '#829DBC',
-            borderRadius: 5,
-            color: '#fff',
-            display: 'flex',
-            flexDirection: 'column',
-            height: 400,
-            marginBottom: 15,
-            overflow: 'scroll',
-            padding: 0,
-            width: '100%',
-          }}>
-          {activeIndicatorItems}
-        </div>
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: '#829DBC',
-            height: '200',
-            overflow: 'hidden',
-            borderRadius: 5,
-            padding: 20,
-            color: '#fff',
-            marginBottom: 5,
-          }}>
-
-          <ul className='list-unstyled list-inline'>
-            <li style={{ fontWeight: 'bold' }}>1Y</li>
-            <li>6M</li>
-            <li>3M</li>
-            <li>1M</li>
-            <li>1D</li>
-            <li><i className="fa fa-cog"></i></li>
-          </ul>
-          {chart}
-        </div>
-        <div style={{
-            display: 'flex',
-            backgroundColor: 'transparent',
-            justifyContent: 'space-between',
-            height: '50',
-            overflow: 'hidden',
-            padding: 3,
-            color: '#1F385E',
-            cursor: 'pointer',
-          }}>
-          <div>
-          <ButtonToolbar>
-            <ButtonGroup bsSize="small">
-              <Button active={(this.state.chartOrMap === 'chart') ? true : false}
-                onClick={() => this._handleChartOrMap('chart')}>Grafiek</Button>
-              <Button active={(this.state.chartOrMap === 'map') ? true : false}
-                onClick={() => this._handleChartOrMap('map')}>Kaart</Button>
-            </ButtonGroup>
-          </ButtonToolbar>
-          </div>
-          <div>
-          <Button
-            onClick={this.props.handleShowConfiguration}
-            bsSize="sm">
-            <i className="fa fa-sm fa-plus-circle"></i>&nbsp;Toevoegen/verwijderen
-          </Button>
-          </div>
-        </div>
-      </div>
+      <Grid fluid>
+        <Row>
+          <Col md={12} style={{ height: 300, overflow: 'scroll', padding: 0}}>
+            {activeIndicatorItems}
+          </Col>
+        </Row>
+        <hr/>
+        <Row>
+          <Col md={12} style={{height:275, paddingBottom:50}}>
+            <ul className='list-unstyled list-inline pull-right'>
+              <li><i className="fa fa-cog"></i></li>
+            </ul>
+            <ul className='list-unstyled list-inline'>
+              <li style={{ fontWeight: 'bold' }}>1Y</li>
+              <li>6M</li>
+              <li>3M</li>
+              <li>1M</li>
+              <li>1D</li>
+            </ul>
+            {chart}
+          </Col>
+        </Row>
+        <Row>
+          <Col md={12}>
+            <Button
+              className='pull-right'
+              onClick={this.props.handleShowConfiguration}
+              bsSize="sm">
+              <i className="fa fa-sm fa-plus-circle"></i>&nbsp;Toevoegen/verwijderen
+            </Button>
+            <ButtonToolbar>
+              <ButtonGroup bsSize="small">
+                <Button active={(this.state.chartOrMap === 'chart') ? true : false}
+                  onClick={() => this._handleChartOrMap('chart')}>Grafiek</Button>
+                <Button active={(this.state.chartOrMap === 'map') ? true : false}
+                  onClick={() => this._handleChartOrMap('map')}>Kaart</Button>
+              </ButtonGroup>
+            </ButtonToolbar>
+          </Col>
+        </Row>
+      </Grid>
    );
   }
 }

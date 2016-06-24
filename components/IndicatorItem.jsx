@@ -42,6 +42,7 @@ class IndicatorItem extends Component {
           display: 'flex',
           justifyContent: 'space-between',
           width: '100%',
+          color: '#fff',
           backgroundColor: ((this.props.selected === true) ? '#1F385E' : '#8795AC'),
           padding: '20px 20px 20px 20px',
           margin: 0,
@@ -49,7 +50,7 @@ class IndicatorItem extends Component {
       }}>
         <div style={{width: 200}}>
           <p>{this.props.name}</p>
-          <p style={{fontSize:'0.8em', lineHeight:'0.2em'}}>{this.props.regionName}</p>
+          <p style={{fontSize:'0.8em', lineHeight:'0.2em'}}><i className="fa fa-globe"></i>&nbsp;{this.props.regionName}</p>
         </div>
         <div>{this.props.series[this.props.series.length-1].value}</div>
         <div>
