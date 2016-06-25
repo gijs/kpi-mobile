@@ -72,8 +72,17 @@ export function fetchIndicators() {
   };
 }
 
+function shouldFetchIndicators(state) {
+  if (state.indicators.indicators.length > 0) {
+    return false;
+  }
+  return true;
+}
+
 export function fetchIndicatorsIfNeeded() {
-  return (dispatch) => {
-    return dispatch(fetchIndicators());
+  return (dispatch, getState) => {
+    if (shouldFetchIndicators(getState())) {
+      return dispatch(fetchIndicators());
+    }
   };
 }

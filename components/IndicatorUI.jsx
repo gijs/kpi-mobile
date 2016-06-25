@@ -90,28 +90,48 @@ class IndicatorUI extends Component {
     return (
       <Grid fluid>
         <Row>
-          <Col md={12} style={{ height: 300, overflow: 'scroll', padding: 0}}>
+          <Col xs={12} sm={12} md={12} lg={12} style={{ height: 300, overflow: 'scroll', padding: 0}}>
             {activeIndicatorItems}
           </Col>
         </Row>
-        <hr/>
         <Row>
-          <Col md={12} style={{height:275, paddingBottom:50}}>
+          <Col xs={12} sm={12} md={12} lg={12} style={{height:275, padding:'10px 10px 45px 10px'}}>
             <ul className='list-unstyled list-inline pull-right'>
-              <li><i className="fa fa-cog"></i></li>
+              <li style={{
+                  cursor: 'pointer',
+                }}><i className="fa fa-cog"></i>
+              </li>
             </ul>
             <ul className='list-unstyled list-inline'>
-              <li style={{ fontWeight: 'bold' }}>1Y</li>
-              <li>6M</li>
-              <li>3M</li>
-              <li>1M</li>
-              <li>1D</li>
+              <li style={{
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                }}>1Y
+              </li>
+              <li style={{
+                  cursor: 'pointer',
+                }}>6M
+              </li>
+              <li style={{
+                  cursor: 'pointer',
+                }}>3M
+              </li>
+              <li style={{
+                  cursor: 'pointer',
+                }}>1M
+              </li>
+              <li style={{
+                  cursor: 'pointer',
+                }}>1D
+              </li>
             </ul>
             {chart}
           </Col>
         </Row>
         <Row>
-          <Col md={12}>
+          <Col xs={12} sm={12} md={12} lg={12} style={{
+               padding: '10px 5px 10px 5px',
+            }}>
             <Button
               className='pull-right'
               onClick={this.props.handleShowConfiguration}

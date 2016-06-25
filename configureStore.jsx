@@ -1,4 +1,5 @@
 import { createStore, applyMiddleware, compose } from 'redux';
+import persistState from 'redux-localstorage';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
 import rootReducer from './reducers.jsx';
@@ -10,7 +11,8 @@ export default function configureStore(initialState) {
     initialState,
     compose(
       applyMiddleware(thunkMiddleware, loggerMiddleware),
-      window.devToolsExtension ? window.devToolsExtension() : f => f
+      window.devToolsExtension ? window.devToolsExtension() : f => f,
+      persistState()
     )
   );
 }

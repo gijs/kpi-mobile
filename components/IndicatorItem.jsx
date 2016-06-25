@@ -46,6 +46,7 @@ class IndicatorItem extends Component {
           backgroundColor: ((this.props.selected === true) ? '#1F385E' : '#8795AC'),
           padding: '20px 20px 20px 20px',
           margin: 0,
+          cursor: 'pointer',
           borderBottom: '1px solid #829DBC',
       }}>
         <div style={{width: 200}}>
