@@ -69,9 +69,13 @@ class IndicatorUI extends Component {
         <ComposedChart
                    height={320}
                    data={linedata}
-                   margin={{ top: 10, right: 20, left: -30, bottom: 0 }}>
-         <XAxis dataKey="date" />
-         <YAxis yAxisId="left" stroke="#ccc" />
+                   margin={{ top: 20, right: 20, left: -30, bottom: 0 }}>
+         <XAxis dataKey="date" tickFormatter={(tick) => {
+             const d = new Date(tick);
+             const options = { year: '2-digit', month: 'numeric'};
+             return `${d.toLocaleDateString('nl-NL', options)}`;
+           }} />
+         <YAxis yAxisId="left" stroke="#ccc" domain={[0,10]} />
          <CartesianGrid strokeDasharray="3 3"/>
          <Tooltip/>
          <Area type="monotone"
@@ -99,7 +103,10 @@ class IndicatorUI extends Component {
             <ul className='list-unstyled list-inline pull-right'>
               <li style={{
                   cursor: 'pointer',
-                }}><i className="fa fa-cog"></i>
+                }}>
+                <Button bsSize='xs'>
+                  <i className="fa fa-cog"></i>&nbsp;Instellingen
+                </Button>
               </li>
             </ul>
             <ul className='list-unstyled list-inline'>
