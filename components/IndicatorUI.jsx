@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
 import d3 from 'd3';
 import { Grid, Row, Col, Label, Button, ButtonToolbar, ButtonGroup }  from 'react-bootstrap';
 import _ from 'lodash';
@@ -28,6 +29,8 @@ class IndicatorUI extends Component {
     super(props);
     this.state = {
       chartOrMap: 'chart',
+      width: window.innerWidth,
+      height: window.innerHeight,
     };
     this._handleChartOrMap = this._handleChartOrMap.bind(this);
   }
@@ -113,6 +116,7 @@ class IndicatorUI extends Component {
       });
     }
 
+
     const chart = (selectedIndicatorItem) ?
       <ResponsiveContainer>
         <ComposedChart
@@ -141,6 +145,31 @@ class IndicatorUI extends Component {
         </ComposedChart>
       </ResponsiveContainer> :
       <div/>;
+
+
+        let initialLocation = {
+          lat: 52.3741,
+          lng: 5.2032,
+          zoom: 11,
+        };
+        const position = [initialLocation.lat, initialLocation.lng];
+        const map = <Map center={position}
+           zoomControl={false}
+           zoom={initialLocation.zoom}
+           style={{ position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: this.state.width,
+                    height: 350,
+                  }}>
+        <TileLayer
+          attribution=''
+          url='https://{s}.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/{z}/{x}/{y}.png'
+        />
+      </Map>;
+
+
+
 
     return (
       <Grid fluid>
@@ -191,7 +220,7 @@ class IndicatorUI extends Component {
               }}>1M
               </li>
             </ul>
-            {chart}
+            {(this.state.chartOrMap === 'chart') ? chart : map}
           </Col>
         </Row>
         <Row>
@@ -207,9 +236,11 @@ class IndicatorUI extends Component {
             <ButtonToolbar>
               <ButtonGroup bsSize="small">
                 <Button active={(this.state.chartOrMap === 'chart') ? true : false}
-                  onClick={() => this._handleChartOrMap('chart')}>Grafiek</Button>
+                        onClick={() => this._handleChartOrMap('chart')}>Grafiek
+                </Button>
                 <Button active={(this.state.chartOrMap === 'map') ? true : false}
-                  onClick={() => this._handleChartOrMap('map')}>Kaart</Button>
+                        onClick={() => this._handleChartOrMap('map')}>Kaart
+                </Button>
               </ButtonGroup>
             </ButtonToolbar>
           </Col>
