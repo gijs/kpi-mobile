@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 
 import {
   fetchIndicatorsIfNeeded,
+  fetchRegionsIfNeeded,
 } from '../actions.jsx';
 import IndicatorUI from './IndicatorUI.jsx';
 import ConfigurationUI from './ConfigurationUI.jsx';
@@ -20,6 +21,7 @@ class App extends Component {
 
   componentDidMount() {
     this.props.dispatch(fetchIndicatorsIfNeeded());
+    this.props.dispatch(fetchRegionsIfNeeded());
   }
 
   handleShowConfiguration() {

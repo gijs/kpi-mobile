@@ -6,6 +6,8 @@ export const SELECT_INDICATOR = 'SELECT_INDICATOR';
 export const TOGGLE_INDICATOR = 'TOGGLE_INDICATOR';
 export const REQUEST_INDICATORS = 'REQUEST_INDICATORS';
 export const RECEIVE_INDICATORS = 'RECEIVE_INDICATORS';
+export const REQUEST_REGIONS = 'REQUEST_REGIONS';
+export const RECEIVE_REGIONS = 'RECEIVE_REGIONS';
 export const SET_DATERANGE_FOR_PI = 'SET_DATERANGE_FOR_PI';
 
 export function setDaterangeForPI(selectedIndicatorItem, rangeType) {
@@ -93,5 +95,70 @@ export function fetchIndicatorsIfNeeded() {
     if (shouldFetchIndicators(getState())) {
       return dispatch(fetchIndicators());
     }
+  };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function requestRegions() {
+  return {
+    type: REQUEST_REGIONS,
+  };
+}
+
+function receiveRegions(regions) {
+  // console.log('regions', regions);
+  return {
+    type: RECEIVE_REGIONS,
+    regions,
+    receivedAt: Date.now(),
+  };
+}
+
+export function fetchRegions(type) {
+
+  const zoomlevelmapping = {
+    'CADASTRE': 11,
+    'DISTRICT': 9,
+    'MUNICIPALITY': 3,
+    'PROVINCE': 1,
+  };
+
+  return dispatch => {
+    dispatch(requestRegions());
+    const regionEndpoint = $.ajax({
+      type: 'GET',
+      /* eslint-disable */
+      url: `https://nxt.staging.lizard.net/api/v2/regions/?type=${zoomlevelmapping[type] || 9}&within_portal_bounds=true&format=json`,
+      xhrFields: {
+        withCredentials: true
+      },
+      /* eslint-enable */
+      success: (data) => {
+        return data;
+      },
+    });
+    Promise.all([regionEndpoint]).then(([regionResults]) => {
+      return dispatch(receiveRegions(regionResults));
+    });
+  };
+}
+
+export function fetchRegionsIfNeeded() {
+  return (dispatch) => {
+    return dispatch(fetchRegions());
   };
 }

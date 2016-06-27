@@ -15,6 +15,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
+import Choropleth from 'react-leaflet-choropleth';
 import d3 from 'd3';
 import { Grid, Row, Col, Label, Button, ButtonToolbar, ButtonGroup }  from 'react-bootstrap';
 import _ from 'lodash';
@@ -22,6 +23,24 @@ import _ from 'lodash';
 import {
   setDaterangeForPI,
 } from '../actions.jsx';
+
+const style = {
+  fillColor: '#000',
+  weight: 2,
+  opacity: 1,
+  color: 'white',
+  dashArray: '5',
+  fillOpacity: 0.5,
+};
+
+const styleSelected = {
+  fillColor: '#fff',
+  weight: 8,
+  opacity: 1,
+  color: 'white',
+  dashArray: '0',
+  fillOpacity: 0.5,
+};
 
 class IndicatorUI extends Component {
 
@@ -147,27 +166,62 @@ class IndicatorUI extends Component {
       <div/>;
 
 
-        let initialLocation = {
-          lat: 52.3741,
-          lng: 5.2032,
-          zoom: 11,
-        };
-        const position = [initialLocation.lat, initialLocation.lng];
-        const map = <Map center={position}
-           zoomControl={false}
-           zoom={initialLocation.zoom}
-           style={{ position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: this.state.width,
-                    height: 350,
-                  }}>
-        <TileLayer
-          attribution=''
-          url='https://{s}.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/{z}/{x}/{y}.png'
-        />
-      </Map>;
+      let zoom = 11;
+      if (selectedIndicatorItem && selectedIndicatorItem.boundaryTypeName === 'DISTRICT') {
+        zoom = 11;
+      } else if (selectedIndicatorItem && selectedIndicatorItem.boundaryTypeName === 'MUNICIPALITY') {
+        zoom = 9;
+      }
 
+      let initialLocation = {
+        lat: 52.3741,
+        lng: 5.2032,
+        zoom: zoom,
+      };
+      const position = [initialLocation.lat, initialLocation.lng];
+      const map = <Map center={position}
+         zoomControl={false}
+         zoom={initialLocation.zoom}
+         style={{
+           position: 'absolute',
+            top: 0,
+            left: 0,
+            width: this.state.width,
+            height: 350,
+        }}>
+      <TileLayer
+        attribution=''
+        url='https://{s}.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/{z}/{x}/{y}.png'
+      />
+      <Choropleth
+        data={this.props.indicators.regions.results}
+        valueProperty={(feature) => {
+          const retval = _.reject(_activeIndicatorItems.map((item) => {
+            if (item.regionName && item.regionName === feature.properties.name) {
+              return item.series[item.series.length-1].score;
+            } else {
+              return 1;
+            }
+          }), _.isUndefined)[0];
+          return retval;
+        }}
+        visible={(feature) => {
+          return true;
+        }}
+        scale={['green', 'red']}
+        steps={10}
+        mode='e'
+        style={(feature) => {
+          if (feature.properties.name === selectedIndicatorItem.regionName) {
+            return styleSelected;
+          }
+          return style;
+        }}
+      />
+    </Map>;
+    // onClick={this.onFeatureClick.bind(self)}
+    // onMouseOver={this.onFeatureHover.bind(self)}
+    // onMouseOut={this.onFeatureHoverOut.bind(self)}
 
 
 

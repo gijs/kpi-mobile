@@ -53,7 +53,7 @@ class IndicatorItem extends Component {
           <p>{this.props.name}</p>
           <p style={{fontSize:'0.8em', lineHeight:'0.2em'}}><i className="fa fa-globe"></i>&nbsp;{this.props.regionName}</p>
         </div>
-        <div>{this.props.series[this.props.series.length-1].value}</div>
+        <div>{Math.round(this.props.series[this.props.series.length-1].score)}</div>
         <div>
           <Label bsStyle='success'>+ {this.props.series[this.props.series.length-1].value}</Label>
         </div>

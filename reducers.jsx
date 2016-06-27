@@ -5,6 +5,8 @@ import {
   TOGGLE_INDICATOR,
   RECEIVE_INDICATORS,
   REQUEST_INDICATORS,
+  REQUEST_REGIONS,
+  RECEIVE_REGIONS,
   SET_DATERANGE_FOR_PI,
 } from './actions.jsx';
 
@@ -67,6 +69,16 @@ function indicators(state = {
         };
       }),
     });
+  case REQUEST_REGIONS:
+    return Object.assign({}, state, {
+      isFetching: true,
+    });
+  case RECEIVE_REGIONS:
+    console.log('action.regions', action.regions);
+    return Object.assign({}, state, {
+      isFetching: false,
+      regions: action.regions,
+    });
   case REQUEST_INDICATORS:
     return Object.assign({}, state, {
       isFetching: true,
@@ -92,11 +104,6 @@ function indicators(state = {
             };
           }),
         };
-      }),
-      piData: action.piData.map((item) => {
-        item[0].id = guid();
-        item[0].regions = item[1].regions;
-        return item[0];
       }),
       zoomlevels: action.zoomlevels,
     });
