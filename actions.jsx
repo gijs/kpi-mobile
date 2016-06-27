@@ -6,6 +6,15 @@ export const SELECT_INDICATOR = 'SELECT_INDICATOR';
 export const TOGGLE_INDICATOR = 'TOGGLE_INDICATOR';
 export const REQUEST_INDICATORS = 'REQUEST_INDICATORS';
 export const RECEIVE_INDICATORS = 'RECEIVE_INDICATORS';
+export const SET_DATERANGE_FOR_PI = 'SET_DATERANGE_FOR_PI';
+
+export function setDaterangeForPI(selectedIndicatorItem, rangeType) {
+  return {
+    type: SET_DATERANGE_FOR_PI,
+    selectedIndicatorItem,
+    rangeType,
+  };
+}
 
 export function selectIndicator(indicator) {
   return {

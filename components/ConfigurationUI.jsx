@@ -90,7 +90,7 @@ class ConfigurationUI extends Component {
               display: 'flex',
               alignItems: 'flex-end',
               padding: 0,
-              fontSize: '12'
+              fontSize: 12
               }}>
               <div style={{position:'absolute', right: 10}}>
                 <Button onClick={this.props.handleShowConfiguration} bsSize='sm' bsStyle='default'>Gereed</Button>

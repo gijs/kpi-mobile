@@ -5,6 +5,7 @@ import {
   TOGGLE_INDICATOR,
   RECEIVE_INDICATORS,
   REQUEST_INDICATORS,
+  SET_DATERANGE_FOR_PI,
 } from './actions.jsx';
 
 function indicators(state = {
@@ -17,6 +18,20 @@ function indicators(state = {
 }, action) {
   // console.log('reducer indicators() was called with state', state, 'and action', action);
   switch (action.type) {
+  case SET_DATERANGE_FOR_PI:
+    return Object.assign({}, state, {
+      indicators: state.indicators.map((item) => {
+        return {
+          name: item.name,
+          regions: item.regions.map((region) => {
+            if (region.id === action.selectedIndicatorItem.id && region.active === true) {
+              region.daterange = action.rangeType;
+            }
+            return region;
+          }),
+        };
+      }),
+    });
   case SELECT_INDICATOR:
     return Object.assign({}, state, {
       indicators: state.indicators.map((item) => {
@@ -27,10 +42,8 @@ function indicators(state = {
               region.selected = true;
               return region;
             }
-            else {
-              region.selected = false;
-              return region;
-            }
+            region.selected = false;
+            return region;
           }),
         };
       }),
@@ -61,7 +74,7 @@ function indicators(state = {
   case RECEIVE_INDICATORS:
     return Object.assign({}, state, {
       isFetching: false,
-      indicators: action.piData.map((item, i) => {
+      indicators: action.piData.map((item) => {
         return {
           name: item[0].name,
           regions: item[1].regions.map((region) => {
@@ -75,11 +88,12 @@ function indicators(state = {
               regionName: region.region_name,
               regionUrl: region.region_url,
               series: region.aggregations,
+              daterange: '3M',
             };
-          })
+          }),
         };
       }),
-      piData: action.piData.map((item, i) => {
+      piData: action.piData.map((item) => {
         item[0].id = guid();
         item[0].regions = item[1].regions;
         return item[0];
