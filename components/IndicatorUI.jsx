@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+
 import IndicatorItem from './IndicatorItem.jsx';
 import {
   Area,
@@ -16,11 +17,13 @@ import {
 } from 'recharts';
 import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
 import Choropleth from 'react-leaflet-choropleth';
+import GeoJsonUpdatable from '../lib/GeoJsonUpdatable.jsx';
 import d3 from 'd3';
-import { Grid, Row, Col, Label, Button, ButtonToolbar, ButtonGroup }  from 'react-bootstrap';
+import { Grid, Row, Col, OverlayTrigger, Label, Modal, Button, ButtonToolbar, ButtonGroup }  from 'react-bootstrap';
 import _ from 'lodash';
 
 import {
+  fetchRegions,
   setDaterangeForPI,
 } from '../actions.jsx';
 
@@ -42,6 +45,16 @@ const styleSelected = {
   fillOpacity: 0.5,
 };
 
+function getColor(d) {
+  return d > 10 ? '#800026' :
+    d > 8 ? '#BD0026' :
+    d > 6 ? '#E31A1C' :
+    d > 4 ? '#FC4E2A' :
+    d > 2 ? '#FD8D3C' :
+    d > 1 ? 'rgb(86,221,84)' :
+    'grey';
+}
+
 class IndicatorUI extends Component {
 
   constructor(props) {
@@ -50,8 +63,11 @@ class IndicatorUI extends Component {
       chartOrMap: 'chart',
       width: window.innerWidth,
       height: window.innerHeight,
+      showModal: false,
     };
     this._handleChartOrMap = this._handleChartOrMap.bind(this);
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
   }
 
   componentDidMount() {
@@ -64,6 +80,61 @@ class IndicatorUI extends Component {
   _handleChartOrMap(type) {
     this.setState({
       chartOrMap: type,
+    });
+  }
+
+  close() {
+    this.setState({ showModal: false });
+  }
+
+  open() {
+    this.setState({ showModal: true });
+  }
+
+  onEachFeature(feature, layer) {
+
+    const _activeIndicatorItems = _.flattenDeep(this.props.indicators.indicators.map((indicator) => {
+      return indicator.regions.filter((region) => {
+        if (region.active) {
+          return region;
+        }
+        return false;
+      });
+    }));
+
+    // console.log('------>', _activeIndicatorItems);
+    // console.log('feature --->', feature);
+
+    const selectedIndicatorItem = _activeIndicatorItems.filter((indicator) => {
+      if (indicator.selected === true && indicator.active === true) {
+        return indicator;
+      }
+      return false;
+    })[0];
+
+    const lastScore = _activeIndicatorItems.map((activeIndicatorItem) => {
+      // console.log('activeIndicatorItem.name', activeIndicatorItem.name, feature.properties.name);
+      if (activeIndicatorItem.regionName === feature.properties.name &&
+          activeIndicatorItem.boundaryTypeName === feature.properties.type) {
+            console.log('-------------');
+        return activeIndicatorItem.series[activeIndicatorItem.series.length - 1].score;
+      }
+    }).filter(n => {
+      if(n) return n;
+      return false;
+    })[0];
+
+    let weight = 1;
+    if (feature.properties.name === selectedIndicatorItem.regionName) {
+      weight = 10;
+    }
+    layer.setStyle({
+      color: '#fff',
+      opacity: 1,
+      weight: weight,
+      // fillColor: 'rgb(86,221,84)',
+      fillColor: getColor(lastScore),
+      fillOpacity: 0.5,
     });
   }
 
@@ -179,49 +250,56 @@ class IndicatorUI extends Component {
         zoom: zoom,
       };
       const position = [initialLocation.lat, initialLocation.lng];
-      const map = <Map center={position}
+
+      const map = (
+        <Map center={position}
          zoomControl={false}
          zoom={initialLocation.zoom}
          style={{
            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: this.state.width,
-            height: 350,
+           top: 0,
+           left: 0,
+           width: this.state.width,
+           height: 350,
         }}>
-      <TileLayer
-        attribution=''
-        url='https://{s}.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/{z}/{x}/{y}.png'
-      />
-      <Choropleth
-        data={this.props.indicators.regions.results}
-        valueProperty={(feature) => {
-          const retval = _.reject(_activeIndicatorItems.map((item) => {
-            if (item.regionName && item.regionName === feature.properties.name) {
-              return item.series[item.series.length-1].score;
-            } else {
-              return 1;
-            }
-          }), _.isUndefined)[0];
-          return retval;
-        }}
-        visible={(feature) => {
-          return true;
-        }}
-        scale={['green', 'red']}
-        steps={10}
-        mode='e'
-        style={(feature) => {
-          if (feature.properties.name === selectedIndicatorItem.regionName) {
-            return styleSelected;
-          }
-          return style;
-        }}
-      />
-    </Map>;
+        <TileLayer
+          attribution=''
+          url='https://{s}.tiles.mapbox.com/v3/nelenschuurmans.l15e647c/{z}/{x}/{y}.png'
+        />
+        <GeoJsonUpdatable
+          data={this.props.indicators.regions.results}
+          onEachFeature={this.onEachFeature.bind(this)}
+        />
+      </Map>
+    );
     // onClick={this.onFeatureClick.bind(self)}
     // onMouseOver={this.onFeatureHover.bind(self)}
     // onMouseOut={this.onFeatureHoverOut.bind(self)}
+    // <Choropleth
+    //   data={this.props.indicators.regions.results}
+    //   valueProperty={(feature) => {
+    //     const retval = _.reject(_activeIndicatorItems.map((item) => {
+    //       if (item.regionName && item.regionName === feature.properties.name) {
+    //         return item.series[item.series.length-1].score;
+    //       } else {
+    //         return 1;
+    //       }
+    //     }), _.isUndefined)[0];
+    //     return retval;
+    //   }}
+    //   visible={(feature) => {
+    //     return true;
+    //   }}
+    //   scale={['green', 'red']}
+    //   steps={10}
+    //   mode='e'
+    //   style={(feature) => {
+    //     if (feature.properties.name === selectedIndicatorItem.regionName) {
+    //       return styleSelected;
+    //     }
+    //     return style;
+    //   }}
+    // />
 
 
 
@@ -238,7 +316,7 @@ class IndicatorUI extends Component {
               <li style={{
                   cursor: 'pointer',
                 }}>
-                <Button bsSize='xs'>
+                <Button bsSize='xs' onClick={this.open}>
                   <i className="fa fa-cog"></i>&nbsp;Instellingen
                 </Button>
               </li>
@@ -299,6 +377,18 @@ class IndicatorUI extends Component {
             </ButtonToolbar>
           </Col>
         </Row>
+        <Modal show={this.state.showModal} onHide={this.close}>
+         <Modal.Header closeButton>
+           <Modal.Title>Instellingen</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>
+           <h4>Referentiewaarde</h4>
+           <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula.</p>
+         </Modal.Body>
+         <Modal.Footer>
+           <Button onClick={this.close}>Toepassen</Button>
+         </Modal.Footer>
+       </Modal>
       </Grid>
    );
   }

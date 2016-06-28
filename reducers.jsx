@@ -74,7 +74,6 @@ function indicators(state = {
       isFetching: true,
     });
   case RECEIVE_REGIONS:
-    console.log('action.regions', action.regions);
     return Object.assign({}, state, {
       isFetching: false,
       regions: action.regions,

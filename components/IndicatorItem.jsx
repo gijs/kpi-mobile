@@ -17,6 +17,7 @@ import { Grid, Row, Col, Label, Button, }  from 'react-bootstrap';
 import _ from 'lodash';
 import {
   selectIndicator,
+  fetchRegions,
 } from '../actions.jsx';
 
 
@@ -37,7 +38,10 @@ class IndicatorItem extends Component {
   render() {
     return (
       <div
-        onClick={() => {this.props.dispatch(selectIndicator(this.props))}}
+        onClick={() => {
+          this.props.dispatch(selectIndicator(this.props));
+          this.props.dispatch(fetchRegions(this.props.boundaryTypeName));
+        }}
         style={{
           display: 'flex',
           justifyContent: 'space-between',
