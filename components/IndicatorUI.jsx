@@ -1,49 +1,25 @@
 import React, { Component, PropTypes } from 'react';
-
+import zoomlevelLookup from './zoomlevelLookup.jsx';
 import IndicatorItem from './IndicatorItem.jsx';
 import {
   Area,
-  AreaChart,
-  Brush,
   CartesianGrid,
   ComposedChart,
-  Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import { Map, TileLayer, Marker, Popup } from 'react-leaflet';
-import Choropleth from 'react-leaflet-choropleth';
+import { Map, TileLayer, Popup } from 'react-leaflet';
 import GeoJsonUpdatable from '../lib/GeoJsonUpdatable.jsx';
 import d3 from 'd3';
-import { Grid, Row, Col, OverlayTrigger, Label, Modal, Button, ButtonToolbar, ButtonGroup }  from 'react-bootstrap';
+import { Grid, Row, Col, Label, Modal, Button, ButtonToolbar, ButtonGroup }  from 'react-bootstrap';
 import _ from 'lodash';
 
 import {
-  fetchRegions,
   setDaterangeForPI,
 } from '../actions.jsx';
-
-const style = {
-  fillColor: '#000',
-  weight: 2,
-  opacity: 1,
-  color: 'white',
-  dashArray: '5',
-  fillOpacity: 0.5,
-};
-
-const styleSelected = {
-  fillColor: '#fff',
-  weight: 8,
-  opacity: 1,
-  color: 'white',
-  dashArray: '0',
-  fillOpacity: 0.5,
-};
 
 function getColor(d) {
   return d > 10 ? '#800026' :
@@ -64,8 +40,10 @@ class IndicatorUI extends Component {
       width: window.innerWidth,
       height: window.innerHeight,
       showModal: false,
+      zoomlevel: undefined,
     };
     this._handleChartOrMap = this._handleChartOrMap.bind(this);
+    this._setZoomlevel = this._setZoomlevel.bind(this);
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
   }
@@ -81,6 +59,19 @@ class IndicatorUI extends Component {
     this.setState({
       chartOrMap: type,
     });
+  }
+
+  _setZoomlevel(zoomlevel) {
+    if (zoomlevel === this.state.zoomlevel) {
+      this.setState({
+        zoomlevel: undefined,
+      });
+    }
+    else {
+      this.setState({
+        zoomlevel,
+      });
+    }
   }
 
   close() {
@@ -102,9 +93,6 @@ class IndicatorUI extends Component {
       });
     }));
 
-    // console.log('------>', _activeIndicatorItems);
-    // console.log('feature --->', feature);
-
     const selectedIndicatorItem = _activeIndicatorItems.filter((indicator) => {
       if (indicator.selected === true && indicator.active === true) {
         return indicator;
@@ -113,11 +101,9 @@ class IndicatorUI extends Component {
     })[0];
 
     const lastScore = _activeIndicatorItems.map((activeIndicatorItem) => {
-      // console.log('activeIndicatorItem.name', activeIndicatorItem.name, feature.properties.name);
       if (activeIndicatorItem.regionName === feature.properties.name &&
           activeIndicatorItem.boundaryTypeName === feature.properties.type) {
-            console.log('-------------');
-        return activeIndicatorItem.series[activeIndicatorItem.series.length - 1].score;
+            return activeIndicatorItem.series[activeIndicatorItem.series.length - 1].score;
       }
     }).filter(n => {
       if(n) return n;
@@ -136,6 +122,10 @@ class IndicatorUI extends Component {
       fillColor: getColor(lastScore),
       fillOpacity: 0.5,
     });
+
+    // console.log('Wijk', feature.properties.name, 'Score', lastScore);
+    console.log('%c %s %s', `background: ${getColor(lastScore)}; color: #ffffff`, feature.properties.name, lastScore);
+
   }
 
   render() {
@@ -152,10 +142,13 @@ class IndicatorUI extends Component {
 
     // Create React elements for each filtered indicator item ^^
     const activeIndicatorItems = _activeIndicatorItems.map((_activeIndicatorItem, i) => {
-      return <IndicatorItem
-        key={i}
-        dispatch={this.props.dispatch}
-        {..._activeIndicatorItem} />;
+      return (
+        <IndicatorItem
+          key={i}
+          dispatch={this.props.dispatch}
+          {..._activeIndicatorItem}
+        />
+      );
     });
 
     const selectedIndicatorItem = _activeIndicatorItems.filter((indicator) => {
@@ -254,7 +247,7 @@ class IndicatorUI extends Component {
       const map = (
         <Map center={position}
          zoomControl={false}
-         zoom={initialLocation.zoom}
+         zoom={(this.state.zoomlevel) ? this.state.zoomlevel : initialLocation.zoom}
          style={{
            position: 'absolute',
            top: 0,
@@ -272,36 +265,6 @@ class IndicatorUI extends Component {
         />
       </Map>
     );
-    // onClick={this.onFeatureClick.bind(self)}
-    // onMouseOver={this.onFeatureHover.bind(self)}
-    // onMouseOut={this.onFeatureHoverOut.bind(self)}
-    // <Choropleth
-    //   data={this.props.indicators.regions.results}
-    //   valueProperty={(feature) => {
-    //     const retval = _.reject(_activeIndicatorItems.map((item) => {
-    //       if (item.regionName && item.regionName === feature.properties.name) {
-    //         return item.series[item.series.length-1].score;
-    //       } else {
-    //         return 1;
-    //       }
-    //     }), _.isUndefined)[0];
-    //     return retval;
-    //   }}
-    //   visible={(feature) => {
-    //     return true;
-    //   }}
-    //   scale={['green', 'red']}
-    //   steps={10}
-    //   mode='e'
-    //   style={(feature) => {
-    //     if (feature.properties.name === selectedIndicatorItem.regionName) {
-    //       return styleSelected;
-    //     }
-    //     return style;
-    //   }}
-    // />
-
-
 
     return (
       <Grid fluid>
@@ -374,6 +337,21 @@ class IndicatorUI extends Component {
                         onClick={() => this._handleChartOrMap('map')}>Kaart
                 </Button>
               </ButtonGroup>
+              {
+                (this.state.chartOrMap === 'map') ?
+                <ButtonGroup bsSize="small">
+                  {this.props.indicators.zoomlevels.map((zoomlevel, i) => {
+                      return <Button
+                                key={i}
+                                active={(this.state.zoomlevel === zoomlevelLookup[zoomlevel].zoomlevel) ? true : false}
+                                onClick={() => this._setZoomlevel(zoomlevelLookup[zoomlevel].zoomlevel)}>
+                        {zoomlevelLookup[zoomlevel].human_readable}
+                      </Button>;
+                    }
+                  )}
+                </ButtonGroup>
+                : ''
+              }
             </ButtonToolbar>
           </Col>
         </Row>
@@ -383,7 +361,7 @@ class IndicatorUI extends Component {
          </Modal.Header>
          <Modal.Body>
            <h4>Referentiewaarde</h4>
-           <p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula.</p>
+           <p></p>
          </Modal.Body>
          <Modal.Footer>
            <Button onClick={this.close}>Toepassen</Button>
